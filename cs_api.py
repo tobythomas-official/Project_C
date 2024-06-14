@@ -42,10 +42,7 @@ if search_response.status_code == 200:
             data = response.json()
             video_count = len(data["items"])
             csv_writer.writerow([playlist_title,playlist_id,video_count])
-            # print(f"Playlist Title: {playlist_title}")
-            # print(f"Number of Videos: {video_count}")
-            # print("-" * 50)
-
+        
         else:
             print(f"Error getting videos for playlist '{playlist_title}': {response.status_code}, {response.text}")
 
