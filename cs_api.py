@@ -1,17 +1,16 @@
 import requests
-import csv
-
+import json
 
 API_KEY = "AIzaSyA65ki9iwtU-iA0L00kem3IoYImi8CESgc"
 channel_id = "UCzXhzEYY6jgRRj8VNDJg4Sw"
 
-search_url = "https://www.googleapis.com/youtube/v3/search"
+search_url = "https://www.googleapis.com/youtube/v3/playlists"
 search_params = {
     "part": "snippet",
     "channelId": channel_id,
     "type": "playlist",
-    "maxResults": 10,
     "key": API_KEY,
+    "maxResults": 50,
 }
 
 search_response = requests.get(search_url, params=search_params)
@@ -20,13 +19,14 @@ if search_response.status_code == 200:
     search_data = search_response.json()
     playlists = search_data.get("items", [])
 
-    if playlists:
-        chosen_playlist_id = playlists[0]["id"]["playlistId"]
+    for playlist in playlists:
+        playlist_title = playlist["snippet"]["title"]
+        playlist_id = playlist["id"]["playlistId"]
 
         base_url = "https://www.googleapis.com/youtube/v3/playlistItems"
         params = {
-            "part": "snippet, contentDetails",
-            "playlistId": chosen_playlist_id,
+            "part": "snippet",
+            "playlistId": playlist_id,
             "key": API_KEY,
             "maxResults": 50,
         }
@@ -35,9 +35,14 @@ if search_response.status_code == 200:
 
         if response.status_code == 200:
             data = response.json()
+            video_count = len(data["items"])
+
+            print(f"Playlist Title: {playlist_title}")
+            print(f"Number of Videos: {video_count}")
+            print("-" * 50)
+
         else:
-            print(f"Error getting videos: {response.status_code}, {response.text}")
-    else:
-        print(f"No playlists found for channel {channel_id}")
+            print(f"Error getting videos for playlist '{playlist_title}': {response.status_code}, {response.text}")
+
 else:
     print(f"Error searching playlists: {search_response.status_code}, {search_response.text}")
